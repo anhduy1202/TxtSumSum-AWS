@@ -1,16 +1,46 @@
+// bedrock-summary-app-stack.ts
 import * as cdk from 'aws-cdk-lib';
 import { Construct } from 'constructs';
-// import * as sqs from 'aws-cdk-lib/aws-sqs';
+import * as s3 from 'aws-cdk-lib/aws-s3';
+import * as lambda from 'aws-cdk-lib/aws-lambda';
+import * as s3n from 'aws-cdk-lib/aws-s3-notifications';
+import * as iam from 'aws-cdk-lib/aws-iam';
+import * as path from 'path';
 
 export class AiSummarizerFullyhacksStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
     super(scope, id, props);
 
-    // The code that defines your stack goes here
+    // S3 bucket
+    const bucket = new s3.Bucket(this, 'SummaryBucket', {
+      bucketName: 'sumsum-bucket-cdk',
+      removalPolicy: cdk.RemovalPolicy.DESTROY,
+      autoDeleteObjects: true,
+    });
 
-    // example resource
-    // const queue = new sqs.Queue(this, 'AiSummarizerFullyhacksQueue', {
-    //   visibilityTimeout: cdk.Duration.seconds(300)
-    // });
+    // Lambda function
+    const summaryFunction = new lambda.Function(this, 'SummaryLambda', {
+      runtime: lambda.Runtime.PYTHON_3_12,
+      handler: 'index.lambda_handler',
+      code: lambda.Code.fromAsset(path.join(__dirname, './lambda')),
+      timeout: cdk.Duration.seconds(30),
+      environment: {
+        BUCKET_NAME: bucket.bucketName,
+      },
+    });
+
+    // Permissions for Lambda
+    bucket.grantReadWrite(summaryFunction);
+    summaryFunction.addToRolePolicy(new iam.PolicyStatement({
+      actions: ['bedrock:InvokeModel'],
+      resources: ['*'],
+    }));
+
+    // S3 trigger
+    bucket.addEventNotification(
+      s3.EventType.OBJECT_CREATED,
+      new s3n.LambdaDestination(summaryFunction),
+      { prefix: 'uploads/', suffix: '.txt' }
+    );
   }
 }

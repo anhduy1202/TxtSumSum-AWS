@@ -1,8 +1,35 @@
-# Welcome to your CDK TypeScript project
+# AI TXT Summarizer Fullyhacks 2025
 
-This is a blank project for CDK development with TypeScript.
+## Services:
 
-The `cdk.json` file tells the CDK Toolkit how to execute your app.
+- AWS S3: Storage for uploads/, results/ .txt files
+
+- AWS Lambda: Invoke Bedrock model to get summary of .txt files
+
+- AWS Bedrock: Using Claude V2.1 to summarize
+
+## Setup
+- [Install AWS CLI](https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html#getting-started-install-instructions)
+
+- Configure AWS Creds
+
+`aws configure`
+
+- Install AWS CDK
+
+`npm install -g aws-cdk`
+
+- CDK init
+
+`cdk init app --language typescript`
+
+- CDK bootstrap for first time deployment
+
+`cdk bootstrap`
+
+- CDK deploy
+
+`cdk deploy`
 
 ## Useful commands
 
