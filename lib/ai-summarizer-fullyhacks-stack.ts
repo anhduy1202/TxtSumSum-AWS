@@ -18,6 +18,15 @@ export class AiSummarizerFullyhacksStack extends cdk.Stack {
       autoDeleteObjects: true,
     });
 
+    // Create uploads/ and results folders with empty objects
+    new cdk.aws_s3_deployment.BucketDeployment(this, 'CreateFolders', {
+      destinationBucket: bucket,
+      sources: [
+        cdk.aws_s3_deployment.Source.data('uploads/', ''),
+        cdk.aws_s3_deployment.Source.data('results/', ''),
+      ],
+    });
+
     // Lambda function
     const summaryFunction = new lambda.Function(this, 'SummaryLambda', {
       runtime: lambda.Runtime.PYTHON_3_12,
